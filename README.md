@@ -10,6 +10,6 @@ File install_ansible.sh is for installing Ansible in ansible host
 
 Type the command, ansible-playbook site.yml
 
-# auditbeat installation in client host (use site.yml)
+# Auditbeat installation in client host (use site.yml)
 
 Type the command, ansible-playbook site_auditbeat.yml

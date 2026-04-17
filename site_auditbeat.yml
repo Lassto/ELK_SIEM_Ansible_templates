@@ -1,0 +1,64 @@
+---
+- name: Installer et configurer Auditbeat 7.17.10
+  hosts: clients_servers
+  become: yes
+
+  vars:
+    elk_host: "192.168.72.141"
+
+  tasks:
+
+    - name: Télécharger le paquet Auditbeat 7.17.10
+      get_url:
+        url: "https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-7.17.10-amd64.deb"
+        dest: "/tmp/auditbeat-7.17.10-amd64.deb"
+        mode: '0644'
+
+    - name: Installer le paquet Auditbeat
+      apt:
+        deb: "/tmp/auditbeat-7.17.10-amd64.deb"
+        state: present
+
+    - name: Configurer /etc/auditbeat/auditbeat.yml
+      copy:
+        dest: /etc/auditbeat/auditbeat.yml
+        mode: '0644'
+        content: |
+          output.elasticsearch:
+            hosts: ["http://{{ elk_host }}:9200"]
+
+          setup.kibana:
+            host: ["http://{{ elk_host }}:5601"]
+
+          auditbeat.modules:
+            - module: auditd
+              audit_rule_files: [ '${path.config}/audit.rules.d/*.conf' ]
+              audit_rules: |
+                -a always,exit -F arch=b64 -S execve -k exec
+
+            - module: file_integrity
+              paths:
+                - /bin
+                - /usr/bin
+                - /sbin
+                - /usr/sbin
+                - /etc
+
+    - name: Activer le service Auditbeat
+      systemd:
+        name: auditbeat
+        enabled: yes
+
+    - name: Démarrer Auditbeat
+      systemd:
+        name: auditbeat
+        state: started
+
+    - name: Lancer Auditbeat en mode debug (test)
+      command: auditbeat -e -c /etc/auditbeat/auditbeat.yml
+      register: auditbeat_debug_output
+      ignore_errors: yes
+
+    - name: Afficher la sortie debug
+      debug:
+        var: auditbeat_debug_output.stdout

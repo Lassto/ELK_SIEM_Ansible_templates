@@ -9,3 +9,7 @@ File install_ansible.sh is for installing Ansible in ansible host
 # ELK installation in siem host (use site.yml)
 
 Type the command, ansible-playbook site.yml
+
+# ELK auditbeat in client host (use site.yml)
+
+Type the command, ansible-playbook site_auditbeat.yml

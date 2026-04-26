@@ -1,0 +1,11 @@
+input {
+  beats {
+    port => 5044
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["{{ ansible_default_ipv4.address }}:9200"]
+  }
+}

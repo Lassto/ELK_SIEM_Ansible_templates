@@ -1,0 +1,28 @@
+---
+- name: Récupération des informations système Windows
+  hosts: windows
+  gather_facts: yes
+
+  tasks:
+
+    - name: Afficher les informations générales de la machine
+      debug:
+        var: ansible_facts
+
+    - name: Afficher la version de Windows
+      ansible.windows.win_shell: |
+        (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").ProductName
+      register: win_version
+
+    - name: Afficher la version de Windows (résultat)
+      debug:
+        msg: "Version de Windows : {{ win_version.stdout }}"
+
+    - name: Afficher les informations réseau
+      ansible.windows.win_shell: |
+        Get-NetIPAddress | Select-Object IPAddress, InterfaceAlias
+      register: net_info
+
+    - name: Résultat des informations réseau
+      debug:
+        msg: "{{ net_info.stdout_lines }}"
